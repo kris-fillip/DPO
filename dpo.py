@@ -34,7 +34,7 @@ def find_all_linear_names(model):
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
     print(list(lora_module_names))
     return list(lora_module_names)
-    
+
 login()
 
 model_name = "Kris-Fillip/llama_base_sft"
@@ -115,8 +115,8 @@ training_args = TrainingArguments(
 )
 
 peft_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
+    r=64,
+    lora_alpha=128,
     target_modules=find_all_linear_names(model),
     lora_dropout=0.05,
     bias="none",
