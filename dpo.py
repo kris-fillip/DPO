@@ -34,53 +34,12 @@ def find_all_linear_names(model):
             lora_module_names.add(names[0] if len(names) == 1 else names[-1])
     print(list(lora_module_names))
     return list(lora_module_names)
-
-
-def get_proper_data_format(dataset):
-    dataset_length = len(dataset)
-    validation_size = int(0.1 * dataset_length)
-    test_size = 500
-    validation_and_test_size = validation_size + test_size
-    train_dataset = dataset[:len(dataset) - validation_and_test_size]
-    validation_dataset = dataset[len(dataset) - validation_and_test_size:len(dataset) - test_size]
-    test_dataset = dataset[len(dataset) - test_size:]
-    final_train = []
-    final_validation = []
-    for el in train_dataset:
-        new_el = {
-            "prompt": f"[INST] {el['text']} {el['context']} [/INST]",
-            "chosen": el['answer_1'],
-            "rejected": el['answer_2'],
-        }
-        final_train.append(new_el)
-    for el in validation_dataset:
-        new_el = {
-            "prompt": f"[INST] {el['text']} {el['context']} [/INST]",
-            "chosen": el['answer_1'],
-            "rejected": el['answer_2'],
-        }
-        final_validation.append(new_el)
-    with open(os.path.join(data_path, "complete_qa_final_filtered_preprocessed_dpo_train.json"), "w") as file:
-        print(f"training set length: {len(final_train)}")
-        json.dump(final_train, file)
-    with open(os.path.join(data_path, "complete_qa_final_filtered_preprocessed_dpo_validation.json"), "w") as file:
-        print(f"validation set length: {len(final_validation)}")
-        json.dump(final_validation, file)
-
+    
 login()
-data_path = "/data"
-with open(os.path.join(data_path, "complete_qa_final_filtered.json"), "r") as f:
-    data = json.load(f)
-print("Getting proper data format..")
-get_proper_data_format(data)
 
 model_name = "Kris-Fillip/llama_base_sft"
 output_dir="./results_dpo"
 final_checkpoint_dir = os.path.join(output_dir, "final_checkpoint")
-
-# train_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_train.json",split="train")
-
-# validation_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_validation.json",split="train")
 
 train_dataset = load_dataset("Kris-Fillip/reddit_train", split="train")
 

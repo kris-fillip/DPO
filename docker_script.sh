@@ -54,4 +54,4 @@ else
 fi
 
 # NOTE: --ipc=host for full RAM and CPU access or -m 300G --cpus 32 to control access to RAM and cpus
-docker run --rm -it -m 256G --cpus 24 -v "$(pwd)":/workspace -v /../../scratch2/kkahl/Finetuning/results_dpo:/results_dpo/ -v /../../scratch2/kkahl/Finetuning/data:/data/ -w /workspace --user $(id -u):$(id -g) --env XDG_CACHE_HOME --env WANDB_DATA_DIR --env WANDB_API_KEY --gpus=\"device=${gpus}\" $image $command
+docker run --rm -it -m 256G --cpus 24 -v "$(pwd)":/workspace -v /../../scratch2/kkahl/DPO/results_dpo:/results_dpo/ -v /../../scratch2/kkahl/DPO/data:/data/ -w /workspace --user $(id -u):$(id -g) --env XDG_CACHE_HOME --env WANDB_DATA_DIR --env WANDB_API_KEY --gpus=\"device=${gpus}\" $image $command
