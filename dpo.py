@@ -74,13 +74,17 @@ with open(os.path.join(data_path, "complete_qa_final_filtered.json"), "r") as f:
 print("Getting proper data format..")
 get_proper_data_format(data)
 
-model_name = "./results_7b_llama_sft_final_04_23"
+model_name = "Kris-Fillip/llama_base_sft"
 output_dir="./results_dpo"
 final_checkpoint_dir = os.path.join(output_dir, "final_checkpoint")
 
-train_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_train.json",split="train")
+# train_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_train.json",split="train")
 
-validation_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_validation.json",split="train")
+# validation_dataset = load_dataset("json", data_files="data/complete_qa_final_filtered_preprocessed_dpo_validation.json",split="train")
+
+train_dataset = load_dataset("Kris-Fillip/reddit_train", split="train")
+
+validation_dataset = load_dataset("Kris-Fillip/reddit_validation",split="train")
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,

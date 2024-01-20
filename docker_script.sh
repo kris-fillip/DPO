@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-image="dpo/llama-finetuning:v1"
+image="kkahl/llama-dpo:v1"
 command="bash"
 gpus="none"
 
