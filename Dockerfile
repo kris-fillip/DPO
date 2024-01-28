@@ -23,7 +23,7 @@ FROM --platform=$TARGETPLATFORM mambaorg/micromamba:1.4.2 as micromamba
 # -----------------
 FROM --platform=linux/amd64 nvidia/cuda:11.8.0-cudnn8-runtime-ubi8 as amd64ubi8
 # Install compiler for .compile() with PyTorch 2.0 and nano for devcontainers
-RUN yum install -y gcc gcc-c++ nano && yum clean all
+RUN yum install -y gcc gcc-c++ nano git && yum clean all
 # Copy lockfile to container
 COPY conda-lock.yml /locks/conda-lock.yml
 
@@ -35,7 +35,7 @@ COPY conda-lock.yml /locks/conda-lock.yml
 # -----------------
 FROM --platform=linux/amd64 nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 as amd64ubuntu
 # Install compiler for .compile() with PyTorch 2.0 and nano for devcontainers
-RUN apt-get update && apt-get install -y gcc g++ nano openssh-client && apt-get clean
+RUN apt-get update && apt-get install -y gcc g++ nano openssh-client git && apt-get clean
 # Copy lockfile to container
 COPY conda-lock.yml /locks/conda-lock.yml
 
@@ -44,7 +44,7 @@ COPY conda-lock.yml /locks/conda-lock.yml
 # -----------------
 FROM --platform=linux/ppc64le nvidia/cuda:11.8.0-cudnn8-runtime-ubi8 as ppc64leubi8
 # Install compiler for .compile() with PyTorch 2.0
-RUN yum install -y gcc gcc-c++ && yum clean all
+RUN yum install -y gcc gcc-c++ git && yum clean all
 # Copy ppc64le specififc lockfile to container
 COPY ppc64le.conda-lock.yml /locks/conda-lock.yml
 
@@ -134,19 +134,53 @@ RUN micromamba config set show_banner false --env
 
 # Install optional tricky pip dependencies that do not work with conda-lock
 # RUN micromamba run -n research pip install example-dependency --no-deps --no-cache-dir
-RUN micromamba run -n research pip install trl==0.7.2 --no-deps --no-cache-dir
+
+# RUN micromamba run -n research pip install trl==0.7.2 --no-deps --no-cache-dir
+
+# RUN micromamba run -n research pip install trl==0.7.10 --no-deps --no-cache-dir
+RUN micromamba run -n research pip install -U git+https://git@github.com/kris-fillip/trl.git@main --no-deps --no-cache-dir
+
+
+RUN micromamba run -n research pip install peft==0.7.1 --no-deps --no-cache-dir
+
+
 RUN micromamba run -n research pip install bitsandbytes==0.41.1 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install scipy==1.11.4 --no-deps --no-cache-dir
-RUN micromamba run -n research pip install peft==0.4.0 --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install peft==0.4.0 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install rouge-score==0.1.2 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install absl-py --no-deps --no-cache-dir
 RUN micromamba run -n research pip install nltk --no-deps --no-cache-dir
-RUN micromamba run -n research pip install tyro==0.5.7 --no-deps --no-cache-dir
+RUN micromamba run -n research pip install tyro --no-deps --no-cache-dir
 RUN micromamba run -n research pip install docstring-parser==0.15 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install shtab==1.6.4 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install textstat==0.7.3 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install pyphen==0.14.0 --no-deps --no-cache-dir
 RUN micromamba run -n research pip install zstandard==0.19.0 --no-deps --no-cache-dir
+RUN micromamba run -n research pip install bert_score --no-deps --no-cache-dir
+RUN micromamba run -n research pip install kaleido --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install -U git+https://git@github.com/kris-fillip/evaluate.git@main --no-deps --no-cache-dir
+
+
+# RUN micromamba run -n research pip install packaging --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install ninja --no-deps --no-cache-dir
+
+# RUN micromamba run -n research MAX_JOBS=4 pip install flash-attn --no-build-isolation --no-deps --no-cache-dir
+
+# RUN micromamba run -n research pip install bertopic --no-deps --no-cache-dir
+
+# RUN micromamba run -n research pip install pandas --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install numpy --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install pytz --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install python-dateutil --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install pyarrow --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install torch --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install multiprocess --no-deps --no-cache-dir
+
+
+
+# RUN micromamba run -n research pip install git+https://github.com/google-research/bleurt.git --no-deps --no-cache-dir
+# RUN micromamba run -n research pip install tensorflow --no-deps --no-cache-dir
+
 # RUN micromamba run -n research pip install bleurt@https://github.com/google-research/bleurt/archive/b610120347ef22b494b6d69b4316e303f5932516.zip#egg=bleurt
 
 # Use our environment `research` as default

@@ -15,13 +15,14 @@ dependencies:
   - dargparser
   - wandb
   - lightning
-  - transformers=4.36.2
+  - transformers=4.37.1
   - tokenizers
-  - datasets=2.14.6
+  - datasets=2.16.1
   - loguru
   - tqdm
-  - accelerate=0.21.0
-  - evaluate
+  - accelerate=0.26.1
+  - evaluate=0.4.1
+  - bertopic
 
   # Dev dependencies
   - black

@@ -35,15 +35,19 @@ def find_all_linear_names(model):
     print(list(lora_module_names))
     return list(lora_module_names)
 
+
+# Load the entire model on the GPU 0
+device_map = {"": 0}
+
 login()
 
-model_name = "Kris-Fillip/llama_base_sft"
-output_dir="./results_dpo"
+model_name = "HuggingFaceH4/zephyr-7b-beta"
+output_dir="./results_dpo_zephyr"
 final_checkpoint_dir = os.path.join(output_dir, "final_checkpoint")
 
-train_dataset = load_dataset("Kris-Fillip/reddit_train", split="train")
+train_dataset = load_dataset("Kris-Fillip/reddit_train_new", split="train")
 
-validation_dataset = load_dataset("Kris-Fillip/reddit_validation",split="train")
+validation_dataset = load_dataset("Kris-Fillip/reddit_validation_new",split="train")
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -53,15 +57,22 @@ bnb_config = BitsAndBytesConfig(
 
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    torch_dtype=torch.bfloat16,
+    device_map=device_map,
     quantization_config=bnb_config,
+    torch_dtype=torch.bfloat16,
     cache_dir="llama_model_7b"
 )
 model.config.use_cache = False
+model.config.pretraining_tp = 1
 model = prepare_model_for_kbit_training(model)
 
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-tokenizer.pad_token = tokenizer.eos_token
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True, use_fast=True)
+tokenizer.add_special_tokens({"pad_token":"<PAD>"})
+
+# Set the padding direction to the right
+tokenizer.padding_side = "right"
+
+model.resize_token_embeddings(len(tokenizer), pad_to_multiple_of=32)
 
 def return_prompt_and_responses(samples):
     return {
@@ -100,7 +111,7 @@ training_args = TrainingArguments(
     learning_rate=5e-4,
     bf16=True,
     save_total_limit=5,
-    logging_steps=50,
+    logging_steps=1,
     output_dir=output_dir,
     optim="paged_adamw_8bit",
     lr_scheduler_type="cosine",
@@ -109,14 +120,16 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     dataloader_drop_last=True,
     auto_find_batch_size=True,
+    run_name="zephyr_dpo",
+    report_to="wandb",
     gradient_checkpointing_kwargs={
         "use_reentrant": False
     }
 )
 
 peft_config = LoraConfig(
-    r=64,
-    lora_alpha=128,
+    r=16,
+    lora_alpha=32,
     target_modules=find_all_linear_names(model),
     lora_dropout=0.05,
     bias="none",
@@ -143,8 +156,6 @@ dpo_trainer.train()
 dpo_trainer.save_model(final_checkpoint_dir)
 print("Saved model!")
 
-# Load the entire model on the GPU 0
-device_map = {"": 0}
 reloaded_model = AutoPeftModelForCausalLM.from_pretrained(
     final_checkpoint_dir,
     low_cpu_mem_usage=True,
